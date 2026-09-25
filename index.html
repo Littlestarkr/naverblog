@@ -1,3 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>네이버 블로그 포스팅 구조화 도구</title>
+<style>
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f7f6; color: #333; padding: 20px; max-width: 1200px; margin: 0 auto; word-break: keep-all; }
+    h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px; }
+    .instruction { font-size: 0.95em; color: #2c3e50; background: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; border-radius: 4px; margin-bottom: 25px; line-height: 1.6; }
+    .container { display: flex; gap: 20px; flex-wrap: wrap; }
+    .panel { flex: 1; min-width: 300px; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .panel h3 { margin-top: 0; color: #34495e; font-size: 1.2em; margin-bottom: 15px; }
+    textarea { width: 100%; flex-grow: 1; min-height: 400px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 1em; line-height: 1.6; box-sizing: border-box; font-family: inherit; }
+    #output-area { width: 100%; flex-grow: 1; min-height: 400px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; white-space: pre-wrap; font-size: 1.05em; line-height: 1.8; box-sizing: border-box; overflow-y: auto; outline: none; }
+    .btn { display: block; width: 100%; padding: 18px; color: white; border: none; font-size: 1.1em; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; transition: background 0.3s; }
+    .btn-convert { background: #27ae60; }
+    .btn-convert:hover { background: #219150; }
+    .btn-copy { background: #2980b9; }
+    .btn-copy:hover { background: #1f6391; }
+</style>
+</head>
+<body>
+
+<h1>📝 네이버 블로그 포스팅 구조화 도구</h1>
+<div class="instruction">
+    <b>안내:</b> 좌측에 텍스트를 입력하고 <b>[변환]</b>을 누르십시오. <code>[이미지]</code>, <code>**굵은글씨**</code>, <code>[텍스트](링크주소)</code>를 사용하면 블로그 서식이 자동 적용됩니다.
+</div>
+
+<div class="container">
+    <!-- 입력부 -->
+    <div class="panel">
+        <h3>📥 원문 입력 (Raw Data)</h3>
+        <textarea id="raw-text" placeholder="여기에 클로바노트 스크립트나 회의 메모를 편하게 붙여넣으세요..."></textarea>
+        <button class="btn btn-convert" onclick="formatText()">블로그 포맷으로 구조화하기 ➔</button>
+    </div>
+
+    <!-- 출력부 -->
+    <div class="panel">
+        <h3>📤 블로그 포맷 출력 (Draft)</h3>
+        <div id="output-area" contenteditable="true">변환된 내용이 여기에 표시됩니다. 텍스트를 직접 수정할 수도 있습니다.</div>
+        <button class="btn btn-copy" onclick="copyToClipboard()">📋 결과물 전체 복사하기</button>
+    </div>
+</div>
+
 <script>
 function formatText() {
     const raw = document.getElementById('raw-text').value.trim();
@@ -9,76 +54,84 @@ function formatText() {
     // 단락별 분리 및 공백 제거
     const paragraphs = raw.split('\n').map(p => p.trim()).filter(p => p !== '');
     
-    // 구조화 템플릿 생성
+    // 뼈대 생성
     let formatted = `<b>[제목 제안]: 현장에서 마주한 질문들, 그리고 실질적인 해법</b>\n\n`;
     
     formatted += `<b>■ 시작하며</b>\n`;
     formatted += `현장에서 기업들을 만나다 보면 겉으로 드러난 현상 이면에 숨겨진 진짜 문제들을 마주하게 됩니다. 오늘 나눈 고민과 해결의 과정을 정리해 봅니다.\n\n`;
     
     formatted += `<b>■ 기업 현황 및 주요 논의 사항</b>\n`;
-    // 원문의 전반부를 현황으로 배치
     const oneThird = Math.ceil(paragraphs.length / 3);
     const introText = paragraphs.slice(0, oneThird);
-    introText.forEach(text => {
-        formatted += `· ${text}\n`;
-    });
+    introText.forEach(text => { formatted += `· ${text}\n`; });
     formatted += `\n`;
 
     formatted += `<b>■ 핵심 진단 및 컨설팅 내용</b>\n`;
-    // 원문의 중반부를 해결책(개조식)으로 배치
     const twoThirds = Math.ceil(paragraphs.length * 2 / 3);
     const bodyText = paragraphs.slice(oneThird, twoThirds);
-    bodyText.forEach(text => {
-        formatted += `✔️ ${text}\n`;
-    });
+    bodyText.forEach(text => { formatted += `✔️ ${text}\n`; });
     formatted += `\n`;
 
     formatted += `<b>■ 맺음말 및 시사점</b>\n`;
-    // 원문의 후반부를 결론으로 배치
     const conclusionText = paragraphs.slice(twoThirds).join(' ');
     formatted += `${conclusionText}\n\n`;
     formatted += `본질을 놓치지 않는 단단한 성장을 응원합니다.\n\n`;
     
     formatted += `<span style="color:#888;">[해시태그 추천]\n#수출컨설팅 #경영지도사 #기업성장 #문제해결 #오주현 #공공조달</span>\n\n`;
 
-    // 1. 링크 변환 규칙: [텍스트](URL) 형태를 HTML 링크로 변환
+    // 1. 링크 변환
     formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" style="color:#0066cc; text-decoration:underline;">$1</a>');
 
-    // 2. 이미지 위치 표시 규칙: [이미지] 형태를 시각적 박스로 변환
+    // 2. 이미지 박스 변환
     formatted = formatted.replace(/\[이미지\]/g, '<div style="background:#f1f3f5; padding:20px; text-align:center; border:2px dashed #adb5bd; border-radius:5px; margin:15px 0; color:#495057; font-weight:bold;">📸 네이버 블로그에서 이 위치에 이미지를 첨부하세요</div>');
 
-    // 3. 마크다운 볼드체(**) 변환 규칙: **강조할 내용** 형태를 HTML 굵은 글씨(<b>)로 변환
+    // 3. 마크다운 볼드체 변환
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-    // 4. 텍스트의 줄바꿈을 HTML 줄바꿈(<br>)으로 변환하여 출력영역(innerHTML)에 삽입
+    // 4. 줄바꿈 적용 후 화면 출력
     document.getElementById('output-area').innerHTML = formatted.replace(/\n/g, '<br>');
 }
 
-function copyToClipboard() {
+async function copyToClipboard() {
     const outputArea = document.getElementById('output-area');
-    const outputText = outputArea.innerText;
+    const textToCopy = outputArea.innerText;
+    const htmlToCopy = outputArea.innerHTML;
     
-    if(outputText.startsWith('변환된 내용이') || !outputText.trim()) {
+    if(textToCopy.startsWith('변환된 내용이') || !textToCopy.trim()) {
         alert('복사할 내용이 없습니다. 먼저 원문을 변환해 주십시오.');
         return;
     }
-    
-    // 순수 텍스트가 아닌 '서식이 포함된 HTML(Rich Text)' 자체를 드래그해서 복사하는 효과를 내는 로직
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(outputArea);
-    selection.removeAllRanges();
-    selection.addRange(range);
 
     try {
-        // 선택된 영역을 클립보드에 복사
-        document.execCommand('copy');
-        alert('✅ 서식과 링크가 유지된 채 복사되었습니다. 네이버 블로그(또는 앱) 작성 창에 붙여넣기 하십시오.');
+        // 최신 Clipboard API 지원 환경 (서식 유지)
+        if (navigator.clipboard && window.ClipboardItem) {
+            const data = [new ClipboardItem({
+                "text/plain": new Blob([textToCopy], { type: "text/plain" }),
+                "text/html": new Blob([htmlToCopy], { type: "text/html" })
+            })];
+            await navigator.clipboard.write(data);
+            alert('✅ 서식과 링크가 유지된 채 복사되었습니다. 네이버 블로그 앱에 붙여넣기 하십시오.');
+        } else {
+            throw new Error("ClipboardItem API 미지원");
+        }
     } catch (err) {
-        alert('복사에 실패했습니다: ' + err);
+        // 모바일 사파리 등 구형 환경 우회 로직
+        outputArea.focus();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(outputArea);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        try {
+            document.execCommand('copy');
+            alert('✅ 서식과 링크가 유지된 채 복사되었습니다. 네이버 블로그 앱에 붙여넣기 하십시오.');
+        } catch (fallbackErr) {
+            alert('기기 보안 설정으로 인해 자동 복사가 제한되었습니다. 출력창의 텍스트를 길게 눌러 직접 복사해 주십시오.');
+        }
+        selection.removeAllRanges();
     }
-    
-    // 복사 완료 후 화면의 드래그(선택) 영역 깔끔하게 해제
-    selection.removeAllRanges();
 }
 </script>
+</body>
+</html>
